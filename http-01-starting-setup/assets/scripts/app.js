@@ -4,34 +4,68 @@ const form = document.querySelector('#new-post form')
 const fetchBtn = document.querySelector('#available-posts button')
 const list = document.querySelector('ul')
 
+
+// function sendRequest(method, url, data) {
+//   const promise = new Promise((resolve, reject) => {
+//     const xhr = new XMLHttpRequest()
+//     xhr.setRequestHeader('Content-Type', 'application/json')
+
+
+//     xhr.open(method, url)
+//     // we send request and now we have to wait. We have wait for load event
+//     xhr.responseType = 'json'
+
+//     xhr.onload = function () {
+//       if (xhr.status >= 200 && xhr.status <=  300) {
+//         resolve(xhr.response)
+//       } else {
+//         reject(new Error('Something went wrong'))
+//       }
+//     }
+//     xhr.onerror = function () {
+//       reject('Failed')
+//     }
+//     xhr.send(JSON.stringify(data))
+//   })
+
+//   return promise
+// }
+
 function sendRequest(method, url, data) {
-  const promise = new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.open(method, url)
-    // we send request and now we have to wait. We have wait for load event
-    xhr.responseType = 'json'
-
-    xhr.onload = function () {
-      resolve(xhr.response)
+  return fetch(url, {
+    method: method,
+    body: JSON.stringify(data),
+    header: {
+      'Content-type': 'application/json'
     }
-    xhr.send(JSON.stringify(data))
+  }).then(res => {
+    if (res.status >= 200 && res.status <= 300) {
+      return res.json();
+    } else {
+      res.json().then(err => {
+        throw new Error('FAILED on SERVER')
+      })
+    }
   })
-
-  return promise
 }
 
+
 async function fetchP() {
-  const resData = await sendRequest(
-    'GET',
-    'https://jsonplaceholder.typicode.com/posts'
-  )
-  const res = resData
-  for (const el of res) {
-    const poEl = document.importNode(eachPost.content, true)
-    poEl.querySelector('h2').textContent = el.title
-    poEl.querySelector('p').textContent = el.body
-    poEl.querySelector('li').id = el.id
-    posts.appendChild(poEl)
+  try {
+    const resData = await sendRequest(
+      'GET',
+      'https://jsonplaceholder.typicode.com/post'
+    )
+    const res = resData
+    for (const el of res) {
+      const poEl = document.importNode(eachPost.content, true)
+      poEl.querySelector('h2').textContent = el.title
+      poEl.querySelector('p').textContent = el.body
+      poEl.querySelector('li').id = el.id
+      posts.appendChild(poEl)
+    }
+  } catch (error) {
+    alert(error.message)
   }
 }
 
